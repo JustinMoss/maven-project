@@ -33,6 +33,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </spring:beans>
 
   <!-- base config for embedded AMQ broker -->
+  <jms:activemq-connector name="activeMQ" brokerURL="vm://localhost" validateConnections="true" doc:name="Active MQ"/>
 
   <!-- returns static message: Hello Maven -->
   <flow name="mavenFlow">
@@ -46,13 +47,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <db:select config-ref="Derby_Configuration" doc:name="Database">
       <db:parameterized-query><![CDATA[SELECT * FROM flights]]></db:parameterized-query>
     </db:select>
-    <json:object-to-json-transformer doc:name="Object to JSON"/>
-    <jms:outbound-endpoint  queue="flights" doc:name="JMS"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+    <jms:outbound-endpoint connector-ref="activeMQ" queue="flights" doc:name="JMS"/>
   </flow>
 
   <!-- consumes queued database messages and logs them -->
   <flow name="logFlights">
-    <jms:inbound-endpoint queue="flights" doc:name="JMS"/>
+    <jms:inbound-endpoint queue="flights" connector-ref="activeMQ" doc:name="JMS"/>
     <logger message="#[message.payload]" level="INFO" doc:name="Logger"/>
   </flow>
 
